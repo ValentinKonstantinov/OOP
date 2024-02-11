@@ -2,6 +2,7 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include "CopyFile.h"
 struct Args {
     std::string inputFileName;
     std::string outputFileName;
@@ -9,6 +10,8 @@ struct Args {
 
 std::optional<Args> parseArg(int argc, char* argv[]) {
     if (argc != 3) {
+        std::cout << "Invalid arguments count\n";
+        std::cout << "Usage: CopuFile.exe <in file name> <out file name>\n";
         return std::nullopt;
     };
     Args args;
@@ -17,13 +20,22 @@ std::optional<Args> parseArg(int argc, char* argv[]) {
     return args;
 };
 
+void CopyStrims(std::ifstream& input, std::ofstream& output)
+{
+    //копируем входной файл в выходной
+    char ch;
+    while (input.get(ch)) {
+        if (!output.put(ch)) {
+            break;
+        }
+    };
+}
+
 int main(int argc, char* argv[])
 {
     //проверка правильности аргументов входной строки
     auto args = parseArg(argc, argv);
     if (!args) {
-        std::cout << "Invalid arguments count\n";
-        std::cout << "Usage: CopuFile.exe <in file name> <out file name>\n";
         return 1;
     }
 
@@ -34,6 +46,7 @@ int main(int argc, char* argv[])
         std::cout << "Failed to open '" << args->inputFileName << "' for reading\n";
         return 1;
     };
+
     //открываем выходной файл
     std::ofstream output;
     output.open(args->outputFileName);
@@ -41,13 +54,8 @@ int main(int argc, char* argv[])
         std::cout << "Failed to open '" << args->outputFileName << "'for writing";
         return 1;
     };
-    //копируем входной файл в выходной
-    char ch;
-    while (input.get(ch)) {
-        if(!output.put(ch)) {
-            break;
-       }
-    };
+
+    CopyStrims(input, output);
 
     if (input.bad()) {
         std::cout << "Error read data to input file\n";
