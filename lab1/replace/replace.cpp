@@ -14,7 +14,7 @@ struct Args {
 std::optional<Args> parseArg(int argc, char* argv[]) {
     if (argc != 5) {
         std::cout << "Invalid arguments count\n";
-        std::cout << "Usage: CopuFile.exe <in file name> <out file name>\n";
+        std::cout << "Usage: replace.exe <in file name> <out file name>\n";
         return std::nullopt;
     };
     Args args;
@@ -30,8 +30,8 @@ void replace(std::ifstream& mask, std::ifstream& replacement, std::ifstream& inp
 {
     char ch1;
     char ch2;
-    std::string maskString;
-    std::string replacementString;
+    std::string maskString = "";
+    std::string replacementString = "";
     std::getline(mask, maskString);
     maskString = maskString + "\n";
     std::getline(replacement, replacementString);
@@ -45,15 +45,12 @@ void replace(std::ifstream& mask, std::ifstream& replacement, std::ifstream& inp
             ch1 = line[i];
             if (ch1 == ch2) {
                 ++j;
-                if (maskString[j] != '\n') {
-                    //если не последний символ в маске               
+                if (maskString[j] != '\n') {//если не последний символ в маске                                 
                     ch2 = maskString[j];
                     tempStringForReadingSimbols = tempStringForReadingSimbols + ch1;
                 }
-                else {
-                    //если последний символ в маске тогда записываем в output из replacement
+                else {//если последний символ в маске тогда записываем в output из replacement
                     output << replacementString;
-                    std::cout << replacementString;
                     j = 0;
                     ch2 = maskString[j];
                 }
@@ -62,12 +59,12 @@ void replace(std::ifstream& mask, std::ifstream& replacement, std::ifstream& inp
                 j = 0;
                 ch2 = maskString[j];
                 output << tempStringForReadingSimbols;
-                output.put(ch1);
-                std::cout << tempStringForReadingSimbols << ch1;
+                output.put(ch1);              
             }
         };
-        output.put('\n');
-        std::cout << "\n";
+        if (!input.eof()) {
+            output.put('\n');
+        };
     };
 }
 
@@ -120,9 +117,7 @@ int main(int argc, char* argv[])
         return 1;
     };
 
-
     replace(mask, replacement, input, output);
-  
 
     if (input.bad()) {
         std::cout << "Error read data to input file\n";
