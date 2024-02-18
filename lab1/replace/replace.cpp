@@ -3,15 +3,17 @@
 #include <optional>
 #include <string>
 #include "replace.h"
-
+//на вход 2 файла и 2 строки(что ищем и на что меняем строки)
+//имена функций с заглавных
+//подключить автоформатирование
 struct Args {
     std::string inputFileName;
     std::string outputFileName;
-    std::string searchStringFileName;
-    std::string replaceStringFileName;
+    std::string searchString;
+    std::string replaceString;
 };
 
-std::optional<Args> parseArg(int argc, char* argv[]) {
+std::optional<Args> ParseArg(int argc, char* argv[]) {
     if (argc != 5) {
         std::cout << "Invalid arguments count\n";
         std::cout << "Usage: replace.exe <in file name> <out file name>\n";
@@ -20,62 +22,61 @@ std::optional<Args> parseArg(int argc, char* argv[]) {
     Args args;
     args.inputFileName = argv[1];
     args.outputFileName = argv[2];
-    args.searchStringFileName = argv[3];
-    args.replaceStringFileName = argv[4];
+    args.searchString = argv[3];
+    args.replaceString = argv[4];
 
     return args;
 };
 
-void replace(std::ifstream& mask, std::ifstream& replacement, std::ifstream& input, std::ofstream& output)
+void CharacterComparison(char& ch1, char& ch2, int& j, std::string& searchString, std::string& tempStringForReadingSimbols, std::ofstream& output, std::string& replacement)
 {
-    char ch1;
-    char ch2;
-    std::string maskString = "";
-    std::string replacementString = "";
-    std::getline(mask, maskString);
-    maskString = maskString + "\n";
-    std::getline(replacement, replacementString);
+    if (ch1 == ch2) {
+        ++j;
+        if (searchString[j] != '\n') {//если не последний символ в искомой строке                                
+            ch2 = searchString[j];
+            tempStringForReadingSimbols = tempStringForReadingSimbols + ch1;
+        }
+        else {//если последний символ в искомой строке тогда записываем в output из replacement
+            output << replacement;
+            j = 0;
+            ch2 = searchString[j];
+        }
+    }
+    else {//если символы не совпали обнуляем счетчик по искомой строке и записываем накопленные совпадения в out
+        j = 0;
+        ch2 = searchString[j];
+        output << tempStringForReadingSimbols;
+        output.put(ch1);
+    }
+}
 
-    for (std::string line; std::getline(input, line);)
-    {
-        std::string tempStringForReadingSimbols = "";
-        int j = 0;
-        ch2 = maskString[j];
-        for (int i = 0; (i < line.size()); ++i) {
-            ch1 = line[i];
-            if (ch1 == ch2) {
-                ++j;
-                if (maskString[j] != '\n') {//если не последний символ в маске                                 
-                    ch2 = maskString[j];
-                    tempStringForReadingSimbols = tempStringForReadingSimbols + ch1;
-                }
-                else {//если последний символ в маске тогда записываем в output из replacement
-                    output << replacementString;
-                    j = 0;
-                    ch2 = maskString[j];
-                }
-            }
-            else {//если символы не совпали обнуляем счетчик по маске и записываем накопленные совпадения в out
-                j = 0;
-                ch2 = maskString[j];
-                output << tempStringForReadingSimbols;
-                output.put(ch1);              
-            }
-        };
-        if (!input.eof()) {
-            output.put('\n');
-        };
+void ReplaceLine(char& ch2, std::string& searchString, std::string& line, char& ch1, std::ofstream& output, std::string& replacement, std::ifstream& input)
+{
+    std::string tempStringForReadingSimbols = "";
+    int j = 0;
+    ch2 = searchString[j];
+    for (int i = 0; (i < line.size()); ++i) {
+        ch1 = line[i];
+        CharacterComparison(ch1, ch2, j, searchString, tempStringForReadingSimbols, output, replacement);
+    };
+    if (!input.eof()) {
+        output.put('\n');
     };
 }
 
-int main(int argc, char* argv[])
+void Replace(std::string& searchString, std::string& replacement, std::ifstream& input, std::ofstream& output)
 {
-    //проверка правильности аргументов входной строки
-    auto args = parseArg(argc, argv);
-    if (!args) {
-        return 1;
-    }
+    char ch1;
+    char ch2;
+    for (std::string line; std::getline(input, line);)
+    {
+        ReplaceLine(ch2, searchString, line, ch1, output, replacement, input);
+    };
+};
 
+int StringReplacement(std::optional<Args> args)
+{
+    //вфделить функцию которая выполняет 
     //открываем входной файл
     std::ifstream input;
     input.open(args->inputFileName);
@@ -92,15 +93,8 @@ int main(int argc, char* argv[])
         return 1;
     };
 
-    //открываем файл с маской
-    std::ifstream mask;
-    mask.open(args->searchStringFileName);
-    if (!mask.is_open()) {
-        std::cout << "Failed to open '" << args->searchStringFileName << "'for reading";
-        return 1;
-    };
-    if (mask.eof()) {
-        std::cout << "The search string file is empty";
+    std::string searchString = args->searchString;
+    if (searchString.length() == 0) {
         char ch;
         while (input.get(ch)) {
             if (!output.put(ch)) {
@@ -109,15 +103,11 @@ int main(int argc, char* argv[])
         };
         return 0;
     };
+    searchString = searchString + "\n";
 
-    std::ifstream replacement;
-    replacement.open(args->replaceStringFileName);
-    if (!replacement.is_open()) {
-        std::cout << "Failed to open '" << args->replaceStringFileName << "'for reading";
-        return 1;
-    };
+    std::string replacement = args->replaceString;
 
-    replace(mask, replacement, input, output);
+    Replace(searchString, replacement, input, output);
 
     if (input.bad()) {
         std::cout << "Error read data to input file\n";
@@ -126,6 +116,21 @@ int main(int argc, char* argv[])
 
     if (!output.flush()) {
         std::cout << "Error write data to output file\n";
+        return 1;
+    };
+
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    //проверка наличия аргументов входной строки 
+    auto args = ParseArg(argc, argv);
+    if (!args) {
+        return 1;
+    };
+    auto correct = StringReplacement(args);
+    if (correct) {
         return 1;
     };
     return 0;

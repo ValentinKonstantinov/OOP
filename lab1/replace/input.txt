@@ -1,3 +1,4 @@
 A   A
-AA A
-AAXCA
+AA
+
+aAa
