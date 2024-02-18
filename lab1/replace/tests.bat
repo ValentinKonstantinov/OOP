@@ -46,6 +46,11 @@ REM подаем на вход пустeую строку замены repalce
 fc empty.txt "%TEMP%\output.txt">nul || goto err
 echo Test 7 passed
 
+REM замена подстроки «1231234» внутри текста «12312312345»
+set searchString1231234=1231234
+%MyProgram% input12312312345.txt "%TEMP%\output.txt" %searchString1231234% %replacementEmpty% || goto err
+fc out1235.txt "%TEMP%\output.txt">nul || goto err
+echo Test 8 passed
 
 REM Тесты прошли успешно
 echo All tests passed successfuly

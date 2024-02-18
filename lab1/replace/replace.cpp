@@ -28,7 +28,7 @@ std::optional<Args> ParseArg(int argc, char* argv[]) {
     return args;
 };
 
-void CharacterComparison(char& ch1, char& ch2, int& j, std::string& searchString, std::string& tempStringForReadingSimbols, std::ofstream& output, std::string& replacement)
+int CharacterComparison(char& ch1, char& ch2, int& j, std::string& searchString, std::string& tempStringForReadingSimbols, std::ofstream& output, std::string& replacement)
 {
     if (ch1 == ch2) {
         ++j;
@@ -38,16 +38,17 @@ void CharacterComparison(char& ch1, char& ch2, int& j, std::string& searchString
         }
         else {//если последний символ в искомой строке тогда записываем в output из replacement
             output << replacement;
+            tempStringForReadingSimbols = "";
             j = 0;
             ch2 = searchString[j];
         }
     }
-    else {//если символы не совпали обнуляем счетчик по искомой строке и записываем накопленные совпадения в out
+    else {//если символы не совпали обнуляем счетчик по искомой строке
         j = 0;
         ch2 = searchString[j];
-        output << tempStringForReadingSimbols;
-        output.put(ch1);
-    }
+        return 1;
+    };
+    return 0;
 }
 
 void ReplaceLine(char& ch2, std::string& searchString, std::string& line, char& ch1, std::ofstream& output, std::string& replacement, std::ifstream& input)
@@ -57,7 +58,13 @@ void ReplaceLine(char& ch2, std::string& searchString, std::string& line, char& 
     ch2 = searchString[j];
     for (int i = 0; (i < line.size()); ++i) {
         ch1 = line[i];
-        CharacterComparison(ch1, ch2, j, searchString, tempStringForReadingSimbols, output, replacement);
+        int temp = CharacterComparison(ch1, ch2, j, searchString, tempStringForReadingSimbols, output, replacement);
+        if (temp){
+            i = i - tempStringForReadingSimbols.length();
+            tempStringForReadingSimbols = "";
+            ch1 = line[i];
+            output << ch1;
+        }
     };
     if (!input.eof()) {
         output.put('\n');
