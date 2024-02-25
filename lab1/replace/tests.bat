@@ -41,7 +41,7 @@ REM подаем на вход пограничные состояния положения искомой подстроки (начало кон
 fc borderStatesOut.txt "%TEMP%\output.txt">nul || goto err
 echo Test 6 passed
 
-REM подаем на вход пустeую строку замены repalce
+REM подаем на вход пустую строку замены repalce
 %MyProgram% OneSimbolReplaceable.txt "%TEMP%\output.txt" %searchString% %replacementEmpty% || goto err
 fc empty.txt "%TEMP%\output.txt">nul || goto err
 echo Test 7 passed
