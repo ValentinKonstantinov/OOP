@@ -23,13 +23,11 @@ std::optional<Args> ParseArg(int argc, char* argv[],
         std::cout << "Usage: replace.exe <in file name> <out file name>\n";
         return std::nullopt;
     }
-
     Args args;
     args.inputFileName = argv[1];
     args.outputFileName = argv[2];
     args.searchString = argv[3];
     args.replaceString = argv[4];
-    
     input.open(args.inputFileName);
     if (!input.is_open())
     {
@@ -43,10 +41,8 @@ std::optional<Args> ParseArg(int argc, char* argv[],
         std::cout << "Failed to open '" << args.outputFileName << "'for writing";
         return std::nullopt;
     }
-
     searchString = args.searchString;
     replacement = args.replaceString;
-
     return args;
 }
 
@@ -70,7 +66,6 @@ std::string ReplaceLine(const std::string& subject, const std::string& searchStr
             result.append(subject, pos, foundPos - pos);
             pos = foundPos;
         }
-        // Напишите недостающий код самостоятельно, чтобы функция работала корректно
     }
     return result;
 }
@@ -81,7 +76,8 @@ void Replace(std::ifstream& input, std::ostream& output, const std::string& sear
     for (std::string line; std::getline(input, line);)
     {
         output << ReplaceLine(line, searchString, replacement);
-        if (!input.eof()) {
+        if (!input.eof())
+        {
             output << "\n";
         }         
     }

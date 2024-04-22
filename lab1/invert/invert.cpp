@@ -6,14 +6,17 @@
 #include <limits>
 #include "invert.h"
 
+//std::arrray <>
+
 struct Args
 {
     std::string inputFileName;
 };
 
-std::optional<Args> ParseArg(int argc, char* argv[],
-    std::ifstream& input)
+// 
+std::optional<Args> ParseArg(int argc, char* argv[], std::ifstream& input)
 {
+    //не подавать ссылку на файл, разложить на 2 функции
     if (argc != 2)
     {
         std::cout << "Invalid arguments count\n";
@@ -34,8 +37,10 @@ std::optional<Args> ParseArg(int argc, char* argv[],
     return args;
 }
 
-bool matrixInitialization(std::ifstream& input, float matrix[3][3], int sizeMatrix)
+//readMatrixfrom file
+bool MatrixInitialization(std::ifstream& input, float matrix[3][3], int sizeMatrix)
 {
+    //не передавать 3 параметром размер
     float tempFloat;
     for (int i = 0; i < sizeMatrix; ++i)
     {
@@ -43,6 +48,7 @@ bool matrixInitialization(std::ifstream& input, float matrix[3][3], int sizeMatr
         {
             if (input >> tempFloat)
             {
+                //избавится от переменной tempFloat
                 matrix[i][j] = tempFloat;
             }
             else
@@ -51,6 +57,7 @@ bool matrixInitialization(std::ifstream& input, float matrix[3][3], int sizeMatr
             }
         }
     }
+    //написать в 1 строчку без использования тернарного оператора
     if (!input.eof())
     {
         return false;
@@ -61,7 +68,8 @@ bool matrixInitialization(std::ifstream& input, float matrix[3][3], int sizeMatr
     }
 }
 
-float getDeterminantOfMatrix(float matrix[3][3])
+// не давать изменять массив
+float GetDeterminantOfMatrix(float matrix[3][3])
 {
     float determinantOfMatrix = 0;
     int temp = 0;
@@ -76,7 +84,8 @@ float getDeterminantOfMatrix(float matrix[3][3])
     return determinantOfMatrix;
 }
 
-void getMatrixOfMinors(float matrix[3][3], float matrixOfMinors[3][3])
+//не давать изменять массив объявить внутри и отдать ретурном
+void GetMatrixOfMinors(float matrix[3][3], float matrixOfMinors[3][3])
 {
     matrixOfMinors[0][0] = matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1];
     matrixOfMinors[0][1] = matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0];
@@ -89,7 +98,8 @@ void getMatrixOfMinors(float matrix[3][3], float matrixOfMinors[3][3])
     matrixOfMinors[2][2] = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 }
 
-void getAlgebraicComplementMatrix(float matrixOfMinors[3][3], float algebraicComplementMatrix[3][3])
+//анналогично
+void GetAlgebraicComplementMatrix(float matrixOfMinors[3][3], float algebraicComplementMatrix[3][3])
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -107,7 +117,8 @@ void getAlgebraicComplementMatrix(float matrixOfMinors[3][3], float algebraicCom
     }
 }
 
-void getTransposedAlgebraicComplementMatrix(float algebraicComplementMatrix[3][3], float transposedAlgebraicComplementMatrix[3][3])
+// функция называется неправильно назвать более общим
+void GetTransposedAlgebraicComplementMatrix(float algebraicComplementMatrix[3][3], float transposedAlgebraicComplementMatrix[3][3])
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -117,7 +128,8 @@ void getTransposedAlgebraicComplementMatrix(float algebraicComplementMatrix[3][3
         }
     }
 }
-void getInverseMatrix(float determinantOfMatrix, float transposedAlgebraicComplementMatrix[3][3], float inverseMatrix[3][3])
+// функция называется неправильно назвать более общим
+void GetInverseMatrix(float determinantOfMatrix, float transposedAlgebraicComplementMatrix[3][3], float inverseMatrix[3][3])
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -128,7 +140,7 @@ void getInverseMatrix(float determinantOfMatrix, float transposedAlgebraicComple
     }
 }
 
-void printMatrix(float inverseMatrix[3][3])
+void PrintMatrix(float inverseMatrix[3][3])
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -148,20 +160,20 @@ void printMatrix(float inverseMatrix[3][3])
 bool InvertMatrix(float  matrix[3][3], float  inverseMatrix[3][3])
 {
     const int sizeMatrix = 3;
-    float determinantOfMatrix = getDeterminantOfMatrix(matrix);
+    float determinantOfMatrix = GetDeterminantOfMatrix(matrix);
     if (!determinantOfMatrix)
     {
         std::cout << "determinantOfMatrix = 0, no inverse matrix" << std::endl;
         return false;
     }
     float matrixOfMinors[sizeMatrix][sizeMatrix]{};
-    getMatrixOfMinors(matrix, matrixOfMinors);
+    GetMatrixOfMinors(matrix, matrixOfMinors);
     float algebraicComplementMatrix[sizeMatrix][sizeMatrix]{};
-    getAlgebraicComplementMatrix(matrixOfMinors, algebraicComplementMatrix);
+    GetAlgebraicComplementMatrix(matrixOfMinors, algebraicComplementMatrix);
     float transposedAlgebraicComplementMatrix[sizeMatrix][sizeMatrix]{};
-    getTransposedAlgebraicComplementMatrix(algebraicComplementMatrix, transposedAlgebraicComplementMatrix);
-    getInverseMatrix(determinantOfMatrix, transposedAlgebraicComplementMatrix, inverseMatrix);
-    printMatrix(inverseMatrix);
+    GetTransposedAlgebraicComplementMatrix(algebraicComplementMatrix, transposedAlgebraicComplementMatrix);
+    GetInverseMatrix(determinantOfMatrix, transposedAlgebraicComplementMatrix, inverseMatrix);
+    PrintMatrix(inverseMatrix);
     return true;
 }
 
@@ -174,17 +186,18 @@ int main(int argc, char* argv[])
         std::cout << "Error" << std::endl;
         return 1;
     }
+
     const int sizeMatrix = 3;
     float matrix[sizeMatrix][sizeMatrix];
-    bool correct = matrixInitialization(input, matrix, sizeMatrix);
-    if (!correct)
+    bool correctMatrixInitialization = MatrixInitialization(input, matrix, sizeMatrix);
+    if (!correctMatrixInitialization)
     {
         return 1;
     }
 
     float inverseMatrix[sizeMatrix][sizeMatrix]{};
-    bool correct = InvertMatrix(matrix, inverseMatrix);
-    if (!correct)
+    bool correctInvertMatrix = InvertMatrix(matrix, inverseMatrix);
+    if (!correctInvertMatrix)
     {
         return 1;
     }
