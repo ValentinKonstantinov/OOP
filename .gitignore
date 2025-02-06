@@ -236,3 +236,8 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 samples/01-basics/string-joiner/out.txt
+lab2/dictionary/dictionary.vcxproj
+lab1/CopyFile/CopyFile.sln
+*.vcxproj
+*.filters
+*.sln
