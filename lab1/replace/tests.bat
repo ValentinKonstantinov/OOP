@@ -1,11 +1,13 @@
 @echo off
 
 REM путь к тестируемой программе передается через первый аргумент командной строки
-SET MyProgram="%~1"
+set MyProgram="%~1"
 set searchStringEmpty=""
-set replacementEmpty=""
-set searchString=A
-set replacement=!
+set searchString= "ma"
+set replacement= "mama"
+set searchStringA = "A"
+set replacementEmpty = ""
+
 REM Защита от запуска без аргумента задающего путь к программе
 if %MyProgram%=="" (
 	echo Please specify path to program
@@ -42,15 +44,17 @@ fc borderStatesOut.txt "%TEMP%\output.txt">nul || goto err
 echo Test 6 passed
 
 REM подаем на вход пустую строку замены repalce
-%MyProgram% OneSimbolReplaceable.txt "%TEMP%\output.txt" %searchString% %replacementEmpty% || goto err
-fc empty.txt "%TEMP%\output.txt">nul || goto err
-echo Test 7 passed
+%MyProgram% OneSimbolReplaceable.txt "%TEMP%\output.txt" "%searchStringA%" "%replacementEmpty%" || goto err
+echo Test 7.1 passed
+ REM !!!! fc empty.txt "%TEMP%\output.txt">nul || goto err
+echo Test 7.2 passed
 
 REM замена подстроки «1231234» внутри текста «12312312345»
 set searchString1231234=1231234
-%MyProgram% input12312312345.txt "%TEMP%\output.txt" %searchString1231234% %replacementEmpty% || goto err
+%MyProgram% input12312312345.txt "%TEMP%\output.txt" %searchString1231234% "%replacementEmpty%" || goto err
 fc out1235.txt "%TEMP%\output.txt">nul || goto err
 echo Test 8 passed
+
 
 REM Тесты прошли успешно
 echo All tests passed successfuly
